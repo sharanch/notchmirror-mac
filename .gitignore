@@ -1,0 +1,31 @@
+# Xcode build output
+build/
+
+# Xcode user-specific settings
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcworkspace/xcuserdata/
+
+# Xcode derived data & archives
+DerivedData/
+*.xcarchive
+
+# CocoaPods (if used)
+Pods/
+Podfile.lock
+
+# Swift Package Manager
+.build/
+*.resolved
+
+# macOS
+.DS_Store
+*.swp
+*.orig
+
+# DMG artifacts (built output)
+*.dmg
+
+# Code signing
+*.mobileprovision
+*.p12
