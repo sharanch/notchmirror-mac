@@ -41,18 +41,12 @@ cd /path/to/NotchMirror   # this project folder
 This produces `NotchMirror.dmg` in the current folder.  
 Users double-click it → drag **NotchMirror** to **Applications** → done.
 
-### 4. Notarize (optional, recommended for sharing)
-Notarization removes the "unidentified developer" Gatekeeper warning.  
-Requires a paid Apple Developer account.
-
 ```bash
-xcrun notarytool submit NotchMirror.dmg \
-    --apple-id you@example.com \
-    --team-id XXXXXXXXXX \
-    --password <app-specific-password> \
-    --wait
+xcodebuild -project NotchMirror.xcodeproj -scheme NotchMirror \
+  -configuration Debug -derivedDataPath ./build \
+  CODE_SIGN_IDENTITY="-" build
 
-xcrun stapler staple NotchMirror.dmg
+open ./build/Build/Products/Debug/NotchMirror.app
 ```
 
 Get an app-specific password at: https://appleid.apple.com → Security → App-Specific Passwords
