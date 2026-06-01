@@ -8,8 +8,8 @@ protocol NotchWindowResizable: AnyObject {
 class NotchWindowController: NSWindowController, NotchWindowResizable {
 
     private let clipboardBtnWidth: CGFloat = 36
-    private let cardWidth:  CGFloat = 350
-    private let cardHeight: CGFloat = 350
+    private let cardWidth:  CGFloat = 600
+    private let cardHeight: CGFloat = 600
 
     convenience init() {
         let window = NotchWindow()
