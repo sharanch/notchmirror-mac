@@ -50,7 +50,7 @@ class NotchWindowController: NSWindowController, NotchWindowResizable {
             let totalWidth = max(cardWidth, notch.width) + clipboardBtnWidth
             windowWidth  = totalWidth
             windowHeight = notch.height + cardHeight
-            windowX      = sf.midX - max(cardWidth, notch.width) / 2
+            windowX = sf.midX - notch.width / 2
         } else {
             windowWidth  = notch.width + clipboardBtnWidth
             windowHeight = notch.height
