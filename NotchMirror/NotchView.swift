@@ -11,9 +11,9 @@ private enum Layout {
     static let notchWidthFallback:  CGFloat = 81
     static let notchHeightFallback: CGFloat = 18.5
 
-    // Camera card (below notch)
-    static let cardHeight:          CGFloat = 320
-    static let cardWidth:           CGFloat = 280   // wider than notch pill
+    // Camera card (below notch) — 16:9 landscape mirror, wide enough to feel immersive
+    static let cardWidth:           CGFloat = 380   // wide enough for a proper mirror view
+    static let cardHeight:          CGFloat = 214   // 16:9 ratio (380 × 9/16 ≈ 214)
 
     // Corner radii
     static let pillRadius:          CGFloat = 9    // tight, matches HW notch
@@ -85,26 +85,42 @@ struct NotchView: View {
     // No offsets or Spacers needed — simple HStack, no tricks.
 
     var body: some View {
+        // When expanded the window grows left by overhang = (cardWidth - notchWidth)/2
+        // so the card can sit centred. The pill must be pushed right by that same amount.
+        let overhang: CGFloat = isExpanded
+            ? max((Layout.cardWidth - notchSize.width) / 2, 0)
+            : 0
+
         VStack(alignment: .leading, spacing: 0) {
 
             // ── Row 1: notch row ──────────────────────────────────────────
-            // Pill fills notch width exactly. Clipboard btn is to its right.
-            HStack(alignment: .center, spacing: Layout.clipboardPad) {
-                notchPill   // width = notchSize.width, height = notchSize.height
+            // Pill is offset right by overhang so it stays over the hardware notch.
+            HStack(alignment: .center, spacing: 0) {
+                Spacer().frame(width: overhang)   // left padding = window overhang
+                notchPill
+                Spacer().frame(width: Layout.clipboardPad)
                 clipboardButton
                     .frame(width: Layout.clipboardBtnSize, height: Layout.clipboardBtnSize)
+                Spacer()
             }
             .frame(height: notchSize.height, alignment: .top)
 
             // ── Row 2: camera card ────────────────────────────────────────
-            // Only shown when expanded. Same width as the pill.
+            // The window is already symmetrically wider, so the card just
+            // needs to be centred in the full window width (excluding clipboard btn).
             if isExpanded {
-                cameraCard
-                    .padding(.top, 6)
-                    .transition(.asymmetric(
-                        insertion: .scale(scale: 0.94, anchor: .top).combined(with: .opacity),
-                        removal:   .scale(scale: 0.94, anchor: .top).combined(with: .opacity)
-                    ))
+                HStack(spacing: 0) {
+                    Spacer()
+                    cameraCard
+                    // Push left of clipboard btn area so card stays visually centred
+                    // under the notch, not under the notch+clipboard region.
+                    Spacer().frame(width: Layout.clipboardBtnSize + Layout.clipboardPad)
+                }
+                .padding(.top, 6)
+                .transition(.asymmetric(
+                    insertion: .scale(scale: 0.94, anchor: .top).combined(with: .opacity),
+                    removal:   .scale(scale: 0.94, anchor: .top).combined(with: .opacity)
+                ))
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

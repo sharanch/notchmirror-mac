@@ -8,8 +8,8 @@ protocol NotchWindowResizable: AnyObject {
 class NotchWindowController: NSWindowController, NotchWindowResizable {
 
     private let clipboardBtnWidth: CGFloat = 36
-    private let cardWidth:  CGFloat = 280
-    private let cardHeight: CGFloat = 320
+    private let cardWidth:  CGFloat = 380
+    private let cardHeight: CGFloat = 214
 
     convenience init() {
         let window = NotchWindow()
@@ -53,10 +53,17 @@ class NotchWindowController: NSWindowController, NotchWindowResizable {
         let windowY: CGFloat
 
         if expanded {
-            let totalWidth = max(cardWidth, notch.width) + clipboardBtnWidth
-            windowWidth  = totalWidth
+            // The card is wider than the notch pill, so we must grow the window
+            // leftward AND rightward equally so the card sits centred under the
+            // hardware notch. Strategy:
+            //   • notch pill stays anchored at the notch centre
+            //   • extra card overhang = (cardWidth - notchWidth) / 2 per side
+            //   • clipboard btn still hangs off the right
+            let overhang = max((cardWidth - notch.width) / 2, 0)
+            windowWidth  = overhang + notch.width + overhang + clipboardBtnWidth
             windowHeight = notch.height + cardHeight
-            windowX      = sf.midX - notch.width / 2  // anchor pill over notch
+            // Shift window left by overhang so the pill stays over the notch
+            windowX      = sf.midX - notch.width / 2 - overhang
         } else {
             windowWidth  = notch.width + clipboardBtnWidth
             windowHeight = notch.height
@@ -131,6 +138,15 @@ class NotchWindow: NSPanel {
     override var canBecomeMain: Bool { false }
 
     override func mouseDown(with event: NSEvent) {
+        // Become key immediately on first click so SwiftUI controls (buttons,
+        // popovers, gestures) fire without needing a second "activating" click.
+        // nonactivatingPanel normally skips key promotion, which is why the
+        // camera area required two clicks while the clipboard button worked fine
+        // (popover presentation bypasses the issue; direct tap-gestures do not).
+        if !isKeyWindow {
+            makeKey()
+        }
+
         let loc = event.locationInWindow
         if loc.y >= frame.height - pillHitHeight {
             onPillClick?()
