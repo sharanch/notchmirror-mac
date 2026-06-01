@@ -1,0 +1,117 @@
+name: Build & Release DMG
+
+on:
+  push:
+    tags:
+      - "v*.*.*"        # triggers on version tags like v1.0.0, v1.2.3
+  workflow_dispatch:    # also allows manual runs from the Actions tab
+
+jobs:
+  build:
+    name: Build, Package & Release
+    runs-on: macos-latest
+
+    steps:
+      # ── 1. Checkout ───────────────────────────────────────────────
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      # ── 2. Select Xcode ───────────────────────────────────────────
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      # ── 3. Build archive (unsigned) ───────────────────────────────
+      - name: Build Xcode archive
+        run: |
+          xcodebuild archive \
+            -project NotchMirror.xcodeproj \
+            -scheme NotchMirror \
+            -configuration Release \
+            -archivePath $RUNNER_TEMP/NotchMirror.xcarchive \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      # ── 4. Export .app ────────────────────────────────────────────
+      - name: Export .app
+        run: |
+          cat > $RUNNER_TEMP/ExportOptions.plist << 'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+            "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>mac-application</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>signingCertificate</key>
+            <string>-</string>
+          </dict>
+          </plist>
+          PLIST
+
+          xcodebuild -exportArchive \
+            -archivePath $RUNNER_TEMP/NotchMirror.xcarchive \
+            -exportOptionsPlist $RUNNER_TEMP/ExportOptions.plist \
+            -exportPath $RUNNER_TEMP/export \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      # ── 5. Package as DMG ─────────────────────────────────────────
+      - name: Create DMG
+        run: |
+          APP_PATH="$RUNNER_TEMP/export/NotchMirror.app"
+          DMG_STAGING="$RUNNER_TEMP/dmg-staging"
+
+          mkdir -p "$DMG_STAGING"
+          cp -R "$APP_PATH" "$DMG_STAGING/"
+          ln -s /Applications "$DMG_STAGING/Applications"
+
+          hdiutil create \
+            -volname "NotchMirror" \
+            -srcfolder "$DMG_STAGING" \
+            -ov \
+            -format UDZO \
+            "$RUNNER_TEMP/NotchMirror.dmg"
+
+      # ── 6. Derive version from tag or commit ──────────────────────
+      - name: Set release version
+        id: version
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/}"
+          else
+            VERSION="dev-$(git rev-parse --short HEAD)"
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "DMG_ASSET=NotchMirror-${VERSION}.dmg" >> $GITHUB_OUTPUT
+
+      # ── 7. Rename DMG to include version ─────────────────────────
+      - name: Rename DMG
+        run: |
+          mv "$RUNNER_TEMP/NotchMirror.dmg" \
+             "$RUNNER_TEMP/${{ steps.version.outputs.DMG_ASSET }}"
+
+      # ── 8. Create GitHub Release & upload DMG ─────────────────────
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.VERSION }}
+          name: "NotchMirror ${{ steps.version.outputs.VERSION }}"
+          draft: false
+          prerelease: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+          body: |
+            ## NotchMirror ${{ steps.version.outputs.VERSION }}
+
+            > ⚠️ **Unsigned app** — on first launch, right-click the app and choose **Open**,
+            > then click **Open** again in the dialog. This is a one-time step.
+
+            ### Install
+            1. Download **${{ steps.version.outputs.DMG_ASSET }}** below.
+            2. Open the DMG and drag **NotchMirror** to your Applications folder.
+            3. Right-click → Open on first launch to bypass Gatekeeper.
+          files: ${{ runner.temp }}/${{ steps.version.outputs.DMG_ASSET }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
