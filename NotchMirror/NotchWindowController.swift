@@ -9,7 +9,7 @@ class NotchWindowController: NSWindowController, NotchWindowResizable {
 
     private let clipboardBtnWidth: CGFloat = 36
     private let cardWidth:  CGFloat = 280
-    private let cardHeight: CGFloat = 320
+    private let cardHeight: CGFloat = 330
 
     convenience init() {
         let window = NotchWindow()
@@ -22,47 +22,76 @@ class NotchWindowController: NSWindowController, NotchWindowResizable {
         positionWindow(expanded: expanded)
     }
 
-    private func notchSize(for screen: NSScreen) -> CGSize {
+    // Returns notch rect in screen coordinates (points, not pixels)
+    // Works correctly at all scaling factors by deriving position from
+    // auxiliaryTopLeftArea / auxiliaryTopRightArea which are always in points.
+    private func notchRect(for screen: NSScreen) -> CGRect {
         let h = screen.safeAreaInsets.top
         guard h > 0 else { return .zero }
-        if let l = screen.auxiliaryTopLeftArea, let r = screen.auxiliaryTopRightArea {
-            let w = screen.frame.width - l.width - r.width
-            return CGSize(width: max(w, 60), height: h)
+
+        let sf = screen.frame
+
+        if let left = screen.auxiliaryTopLeftArea,
+           let right = screen.auxiliaryTopRightArea {
+            // Notch X = screen.origin.x + left area width
+            // Notch width = screen width - left width - right width
+            let notchX = sf.minX + left.width
+            let notchW = sf.width - left.width - right.width
+            return CGRect(x: notchX, y: sf.maxY - h, width: max(notchW, 60), height: h)
         }
-        return CGSize(width: 81, height: h)
+
+        // Fallback: assume centered notch
+        let fallbackW: CGFloat = 162 // 81pt * 2x — common MBA value
+        return CGRect(
+            x: sf.midX - fallbackW / 2,
+            y: sf.maxY - h,
+            width: fallbackW,
+            height: h
+        )
     }
 
     private func positionWindow(expanded: Bool) {
         guard let screen = NSScreen.main,
               let window = self.window else { return }
 
-        let notch = notchSize(for: screen)
+        // Only show on screens with a notch
+        guard screen.safeAreaInsets.top > 0 else {
+            window.orderOut(nil)
+            return
+        }
+
+        let notch = notchRect(for: screen)
         guard notch.width > 0 else { return }
 
-        let sf = screen.frame
-
-        let windowWidth: CGFloat
-        let windowHeight: CGFloat
         let windowX: CGFloat
         let windowY: CGFloat
+        let windowWidth: CGFloat
+        let windowHeight: CGFloat
 
         if expanded {
-            let totalWidth = max(cardWidth, notch.width) + clipboardBtnWidth
-            windowWidth  = totalWidth
+            // Window anchors at notch left edge, extends right by cardWidth + clipboard btn
+            // Card is centered under the notch pill
+            let expandedW = max(cardWidth, notch.width) + clipboardBtnWidth
+            windowWidth  = expandedW
             windowHeight = notch.height + cardHeight
-            windowX = sf.midX - notch.width / 2
+            // Keep pill aligned to notch — anchor window X to notch origin
+            windowX = notch.minX
         } else {
             windowWidth  = notch.width + clipboardBtnWidth
             windowHeight = notch.height
-            windowX      = sf.midX - notch.width / 2
+            windowX      = notch.minX
         }
-        windowY = sf.maxY - windowHeight
+        windowY = notch.minY - (windowHeight - notch.height)  // top of window = top of screen
+
+        // Clamp to screen bounds so it never overflows on non-standard scaling
+        let sf = screen.frame
+        let clampedX = min(max(windowX, sf.minX), sf.maxX - windowWidth)
 
         NSAnimationContext.runAnimationGroup { ctx in
             ctx.duration = 0.38
             ctx.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
             window.animator().setFrame(
-                CGRect(x: windowX, y: windowY, width: windowWidth, height: windowHeight),
+                CGRect(x: clampedX, y: windowY, width: windowWidth, height: windowHeight),
                 display: true
             )
         }
@@ -80,6 +109,9 @@ class NotchWindowController: NSWindowController, NotchWindowResizable {
 
     @objc private func screenConfigurationChanged() {
         positionWindow(expanded: false)
+        if let screen = NSScreen.main, screen.safeAreaInsets.top > 0 {
+            window?.orderFrontRegardless()
+        }
     }
 }
 
@@ -89,11 +121,7 @@ class NotchWindowController: NSWindowController, NotchWindowResizable {
 
 class NotchWindow: NSPanel {
 
-    // Set by NotchView after init so the window can fire toggle directly
     var onPillClick: (() -> Void)?
-
-    // The notch pill height — clicks in this top band trigger onPillClick.
-    // Slightly generous (24 pt) vs the physical ~18.5 pt so it's easy to hit.
     private let pillHitHeight: CGFloat = 24
 
     init() {
@@ -123,16 +151,8 @@ class NotchWindow: NSPanel {
     override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { false }
 
-    // -------------------------------------------------------------------------
-    // Intercept mouseDown at the NSWindow level — fires on the FIRST click
-    // regardless of whether the panel is currently key/focused.
-    // Clicks in the pill band (top pillHitHeight pts) go to onPillClick.
-    // Everything else falls through to SwiftUI normally.
-    // -------------------------------------------------------------------------
     override func mouseDown(with event: NSEvent) {
         let loc = event.locationInWindow
-        // locationInWindow is in window-flipped coords: y=0 at bottom.
-        // The pill is at the TOP of the window, so y >= height - pillHitHeight.
         if loc.y >= frame.height - pillHitHeight {
             onPillClick?()
         } else {
