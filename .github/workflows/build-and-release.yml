@@ -3,15 +3,15 @@ name: Build & Release DMG
 on:
   push:
     tags:
-      - "v*.*.*"        # triggers on version tags like v1.0.0, v1.2.3
-  workflow_dispatch:    # also allows manual runs from the Actions tab
+      - "v*.*.*"
+  workflow_dispatch:
 
 jobs:
   build:
     name: Build, Package & Release
     runs-on: macos-latest
     permissions:
-      contents: write   # required to create releases and upload assets
+      contents: write
 
     steps:
       # ── 1. Checkout ───────────────────────────────────────────────
@@ -61,7 +61,17 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
 
-      # ── 5. Package as DMG ─────────────────────────────────────────
+      # ── 5. Strip quarantine & fix permissions ─────────────────────
+      # Without this, macOS shows "damaged and can't be opened" because
+      # files downloaded from the internet get a com.apple.quarantine
+      # extended attribute that Gatekeeper rejects on unsigned apps.
+      - name: Strip extended attributes
+        run: |
+          APP_PATH="$RUNNER_TEMP/export/NotchMirror.app"
+          xattr -cr "$APP_PATH"
+          chmod -R a+x "$APP_PATH/Contents/MacOS/"
+
+      # ── 6. Package as DMG ─────────────────────────────────────────
       - name: Create DMG
         run: |
           APP_PATH="$RUNNER_TEMP/export/NotchMirror.app"
@@ -78,7 +88,7 @@ jobs:
             -format UDZO \
             "$RUNNER_TEMP/NotchMirror.dmg"
 
-      # ── 6. Derive version from tag or commit ──────────────────────
+      # ── 7. Derive version from tag or commit ──────────────────────
       - name: Set release version
         id: version
         run: |
@@ -90,13 +100,13 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "DMG_ASSET=NotchMirror-${VERSION}.dmg" >> $GITHUB_OUTPUT
 
-      # ── 7. Rename DMG to include version ─────────────────────────
+      # ── 8. Rename DMG to include version ─────────────────────────
       - name: Rename DMG
         run: |
           mv "$RUNNER_TEMP/NotchMirror.dmg" \
              "$RUNNER_TEMP/${{ steps.version.outputs.DMG_ASSET }}"
 
-      # ── 8. Create GitHub Release & upload DMG ─────────────────────
+      # ── 9. Create GitHub Release & upload DMG ─────────────────────
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -107,13 +117,20 @@ jobs:
           body: |
             ## NotchMirror ${{ steps.version.outputs.VERSION }}
 
-            > ⚠️ **Unsigned app** — on first launch, right-click the app and choose **Open**,
-            > then click **Open** again in the dialog. This is a one-time step.
+            > ⚠️ **Unsigned app** — macOS may block it on first launch.
+            > To open: right-click the app → **Open** → **Open**.
+            > This is a one-time step.
 
             ### Install
             1. Download **${{ steps.version.outputs.DMG_ASSET }}** below.
-            2. Open the DMG and drag **NotchMirror** to your Applications folder.
+            2. Open the DMG and drag **NotchMirror** to Applications.
             3. Right-click → Open on first launch to bypass Gatekeeper.
+
+            ### If you see "damaged and can't be opened"
+            Run this in Terminal after copying to Applications:
+            ```
+            xattr -cr /Applications/NotchMirror.app
+            ```
           files: ${{ runner.temp }}/${{ steps.version.outputs.DMG_ASSET }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
