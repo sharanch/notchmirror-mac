@@ -277,12 +277,20 @@ struct NotchView: View {
 
 struct ClipboardPopover: View {
     @ObservedObject var clipboard: ClipboardManager
-    @State private var searchText = ""
+    @State private var searchText  = ""
     @State private var hoveredId: UUID? = nil
+    @State private var showClearConfirm = false
 
-    private var filtered: [ClipboardItem] {
-        guard !searchText.isEmpty else { return clipboard.items }
-        return clipboard.items.filter {
+    private var filteredPinned: [ClipboardItem] {
+        filter(clipboard.pinnedItems)
+    }
+    private var filteredRecent: [ClipboardItem] {
+        filter(clipboard.recentItems)
+    }
+
+    private func filter(_ list: [ClipboardItem]) -> [ClipboardItem] {
+        guard !searchText.isEmpty else { return list }
+        return list.filter {
             switch $0.content {
             case .text(let t):  return t.localizedCaseInsensitiveContains(searchText)
             case .image:        return "image".contains(searchText.lowercased())
@@ -290,15 +298,26 @@ struct ClipboardPopover: View {
         }
     }
 
-    private func shortcut(for index: Int) -> String { index < 9 ? "⌘\(index + 1)" : "" }
+    private func shortcut(for item: ClipboardItem) -> String {
+        guard searchText.isEmpty else { return "" }
+        // Shortcuts are over the full items list (pinned first)
+        let all = clipboard.pinnedItems + clipboard.recentItems
+        if let idx = all.firstIndex(where: { $0.id == item.id }), idx < 9 {
+            return "⌘\(idx + 1)"
+        }
+        return ""
+    }
 
     var body: some View {
         VStack(spacing: 0) {
+
+            // ── Header: title + search + clear ──────────────────────────
             HStack(spacing: 6) {
                 Text("Clipboard")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(.white.opacity(0.5))
                     .frame(width: 60, alignment: .leading)
+
                 HStack(spacing: 4) {
                     Image(systemName: "magnifyingglass")
                         .font(.system(size: 11))
@@ -307,16 +326,56 @@ struct ClipboardPopover: View {
                         .textFieldStyle(.plain)
                         .font(.system(size: 13))
                         .foregroundColor(.white)
+                    if !searchText.isEmpty {
+                        Button { searchText = "" } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 11))
+                                .foregroundColor(.white.opacity(0.3))
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
                 .padding(.horizontal, 8).padding(.vertical, 5)
                 .background(Color.white.opacity(0.07))
                 .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+
+                // Clear button (only visible when there are unpinned items)
+                if !clipboard.recentItems.isEmpty {
+                    Button {
+                        showClearConfirm = true
+                    } label: {
+                        Image(systemName: "trash")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundColor(.white.opacity(0.35))
+                            .frame(width: 26, height: 26)
+                            .background(Color.white.opacity(0.07))
+                            .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                    .onHover { h in h ? NSCursor.pointingHand.push() : NSCursor.pop() }
+                    .confirmationDialog(
+                        "Clear clipboard history?",
+                        isPresented: $showClearConfirm,
+                        titleVisibility: .visible
+                    ) {
+                        Button("Clear History", role: .destructive) { clipboard.clearAll() }
+                        Button("Cancel", role: .cancel) { }
+                    } message: {
+                        Text(clipboard.pinnedItems.isEmpty
+                             ? "All items will be removed."
+                             : "Pinned items will be kept.")
+                    }
+                }
             }
             .padding(.horizontal, 12).padding(.vertical, 10)
 
             Divider().background(Color.white.opacity(0.08))
 
-            if filtered.isEmpty {
+            // ── Content ──────────────────────────────────────────────────
+            let hasPinned = !filteredPinned.isEmpty
+            let hasRecent = !filteredRecent.isEmpty
+
+            if !hasPinned && !hasRecent {
                 VStack(spacing: 6) {
                     Image(systemName: "clipboard").font(.system(size: 20))
                         .foregroundColor(.white.opacity(0.15))
@@ -326,21 +385,56 @@ struct ClipboardPopover: View {
                 .frame(maxWidth: .infinity).padding(.vertical, 24)
             } else {
                 ScrollView(.vertical, showsIndicators: false) {
-                    LazyVStack(spacing: 0) {
-                        ForEach(Array(filtered.enumerated()), id: \.element.id) { idx, item in
-                            ClipboardRow(
-                                item: item, shortcut: shortcut(for: idx),
-                                isHovered: hoveredId == item.id,
-                                onTap: { clipboard.copy(item) }
-                            )
-                            .onHover { h in hoveredId = h ? item.id : nil }
-                            if idx < filtered.count - 1 {
-                                Divider().background(Color.white.opacity(0.05)).padding(.leading, 10)
+                    LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
+
+                        // ── Pinned section ──────────────────────────────
+                        if hasPinned {
+                            Section {
+                                ForEach(Array(filteredPinned.enumerated()), id: \.element.id) { idx, item in
+                                    ClipboardRow(
+                                        item: item,
+                                        shortcut: shortcut(for: item),
+                                        isHovered: hoveredId == item.id,
+                                        onTap:   { clipboard.copy(item) },
+                                        onPin:   { clipboard.togglePin(item) },
+                                        onDelete: { clipboard.delete(item) }
+                                    )
+                                    .onHover { h in hoveredId = h ? item.id : nil }
+                                    if idx < filteredPinned.count - 1 || hasRecent {
+                                        Divider().background(Color.white.opacity(0.05)).padding(.leading, 10)
+                                    }
+                                }
+                            } header: {
+                                SectionHeader(title: "Pinned", icon: "pin.fill")
+                            }
+                        }
+
+                        // ── Recent section ──────────────────────────────
+                        if hasRecent {
+                            Section {
+                                ForEach(Array(filteredRecent.enumerated()), id: \.element.id) { idx, item in
+                                    ClipboardRow(
+                                        item: item,
+                                        shortcut: shortcut(for: item),
+                                        isHovered: hoveredId == item.id,
+                                        onTap:   { clipboard.copy(item) },
+                                        onPin:   { clipboard.togglePin(item) },
+                                        onDelete: { clipboard.delete(item) }
+                                    )
+                                    .onHover { h in hoveredId = h ? item.id : nil }
+                                    if idx < filteredRecent.count - 1 {
+                                        Divider().background(Color.white.opacity(0.05)).padding(.leading, 10)
+                                    }
+                                }
+                            } header: {
+                                if hasPinned {
+                                    SectionHeader(title: "Recent", icon: "clock")
+                                }
                             }
                         }
                     }
                 }
-                .frame(maxHeight: 320)
+                .frame(maxHeight: 360)
             }
         }
         .frame(width: 340)
@@ -349,15 +443,45 @@ struct ClipboardPopover: View {
     }
 }
 
+// ── Section header ──────────────────────────────────────────────────────────
+
+struct SectionHeader: View {
+    let title: String
+    let icon: String
+
+    var body: some View {
+        HStack(spacing: 5) {
+            Image(systemName: icon)
+                .font(.system(size: 9, weight: .semibold))
+                .foregroundColor(.white.opacity(0.25))
+            Text(title)
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundColor(.white.opacity(0.25))
+                .textCase(.uppercase)
+                .tracking(0.6)
+            Spacer()
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 5)
+        .background(Color(white: 0.10))   // matches popover background so it blends
+    }
+}
+
+// ── Row ─────────────────────────────────────────────────────────────────────
+
 struct ClipboardRow: View {
     let item: ClipboardItem
     let shortcut: String
     let isHovered: Bool
-    let onTap: () -> Void
+    let onTap:    () -> Void
+    let onPin:    () -> Void
+    let onDelete: () -> Void
 
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 10) {
+
+                // Leading icon
                 switch item.content {
                 case .text(let t):
                     Image(systemName: t.hasPrefix("http") ? "link" : "doc.on.clipboard")
@@ -367,11 +491,59 @@ struct ClipboardRow: View {
                         .frame(width: 28, height: 20)
                         .clipShape(RoundedRectangle(cornerRadius: 3))
                 }
-                Text(item.preview).font(.system(size: 13)).foregroundColor(.white.opacity(0.85))
-                    .lineLimit(1).truncationMode(.tail).frame(maxWidth: .infinity, alignment: .leading)
-                if !shortcut.isEmpty {
-                    Text(shortcut).font(.system(size: 11, weight: .medium, design: .monospaced))
-                        .foregroundColor(.white.opacity(0.25)).frame(width: 32, alignment: .trailing)
+
+                // Preview text
+                Text(item.preview)
+                    .font(.system(size: 13))
+                    .foregroundColor(.white.opacity(0.85))
+                    .lineLimit(1).truncationMode(.tail)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                // Trailing actions — visible on hover
+                if isHovered {
+                    HStack(spacing: 4) {
+                        // Pin / unpin
+                        Button(action: onPin) {
+                            Image(systemName: item.isPinned ? "pin.slash" : "pin")
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundColor(item.isPinned
+                                                 ? Color(red: 1, green: 0.8, blue: 0.2)
+                                                 : .white.opacity(0.4))
+                                .frame(width: 22, height: 22)
+                                .background(Color.white.opacity(0.08))
+                                .clipShape(RoundedRectangle(cornerRadius: 4))
+                        }
+                        .buttonStyle(.plain)
+                        .onHover { h in h ? NSCursor.pointingHand.push() : NSCursor.pop() }
+                        .help(item.isPinned ? "Unpin" : "Pin")
+
+                        // Delete
+                        Button(action: onDelete) {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundColor(.white.opacity(0.4))
+                                .frame(width: 22, height: 22)
+                                .background(Color.white.opacity(0.08))
+                                .clipShape(RoundedRectangle(cornerRadius: 4))
+                        }
+                        .buttonStyle(.plain)
+                        .onHover { h in h ? NSCursor.pointingHand.push() : NSCursor.pop() }
+                        .help("Remove")
+                    }
+                } else {
+                    // Shortcut badge or pin indicator
+                    HStack(spacing: 4) {
+                        if item.isPinned {
+                            Image(systemName: "pin.fill")
+                                .font(.system(size: 9))
+                                .foregroundColor(Color(red: 1, green: 0.8, blue: 0.2).opacity(0.7))
+                        } else if !shortcut.isEmpty {
+                            Text(shortcut)
+                                .font(.system(size: 11, weight: .medium, design: .monospaced))
+                                .foregroundColor(.white.opacity(0.25))
+                        }
+                    }
+                    .frame(width: 48, alignment: .trailing)
                 }
             }
             .padding(.horizontal, 12).padding(.vertical, 8)
