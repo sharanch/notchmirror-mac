@@ -117,20 +117,18 @@ jobs:
           body: |
             ## NotchMirror ${{ steps.version.outputs.VERSION }}
 
-            > ⚠️ **Unsigned app** — macOS may block it on first launch.
-            > To open: right-click the app → **Open** → **Open**.
-            > This is a one-time step.
-
             ### Install
-            1. Download **${{ steps.version.outputs.DMG_ASSET }}** below.
-            2. Open the DMG and drag **NotchMirror** to Applications.
-            3. Right-click → Open on first launch to bypass Gatekeeper.
-
-            ### If you see "damaged and can't be opened"
-            Run this in Terminal after copying to Applications:
+            1. Download **${{ steps.version.outputs.DMG_ASSET }}** below
+            2. Open the DMG and drag **NotchMirror** to your Applications folder
+            3. Open Terminal and run:
             ```
             xattr -cr /Applications/NotchMirror.app
             ```
+            4. Launch NotchMirror from Applications or Spotlight
+
+            > **Why step 3?** Apple requires a paid Developer account to notarize apps.
+            > Without it, macOS blocks apps downloaded from the internet.
+            > The command above removes that block — it's safe to run.
           files: ${{ runner.temp }}/${{ steps.version.outputs.DMG_ASSET }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
