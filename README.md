@@ -8,8 +8,7 @@ A macOS menu-bar app that turns your MacBook notch into a mirror — click the n
 
 ### Requirements
 - Xcode 15+
-- macOS 14+ (Sonoma) target device
-- Apple Developer account (free tier is fine for personal use; paid required for notarization)
+- macOS 14+ (Sonoma) target device (mba m2+ and mbp m2 pro and above)
 
 ### Steps to install
 
