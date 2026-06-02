@@ -89,18 +89,6 @@ class NotchWindowController: NSWindowController, NotchWindowResizable {
             name: NSApplication.didChangeScreenParametersNotification,
             object: nil
         )
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(appDidEnterFullScreen(_:)),
-            name: NSWindow.didEnterFullScreenNotification,
-            object: nil
-        )
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(appDidExitFullScreen(_:)),
-            name: NSWindow.didExitFullScreenNotification,
-            object: nil
-        )
     }
 
     @objc private func screenConfigurationChanged() {
@@ -108,19 +96,6 @@ class NotchWindowController: NSWindowController, NotchWindowResizable {
         // Re-show if main screen has notch (e.g. unplugged external monitor)
         if let screen = NSScreen.main, screen.safeAreaInsets.top > 0 {
             window?.orderFrontRegardless()
-        }
-    }
-
-    @objc private func appDidEnterFullScreen(_ notification: Notification) {
-        // Ignore fullscreen transitions from our own panel
-        guard let win = notification.object as? NSWindow, win !== self.window else { return }
-        window?.orderOut(nil)
-    }
-
-    @objc private func appDidExitFullScreen(_ notification: Notification) {
-        guard let win = notification.object as? NSWindow, win !== self.window else { return }
-        if let screen = NSScreen.main, screen.safeAreaInsets.top > 0 {
-            positionWindow(expanded: false)
         }
     }
 }
