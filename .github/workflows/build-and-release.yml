@@ -122,7 +122,8 @@ jobs:
             2. Open the DMG and drag **NotchMirror** to your Applications folder
             3. Open Terminal and run:
             ```
-            xattr -cr /Applications/NotchMirror.app
+            xattr -cr /Applications/NotchMirror.app #or 
+            xattr -c /Applications/NotchMirror.app
             ```
             4. Launch NotchMirror from Applications or Spotlight
 
