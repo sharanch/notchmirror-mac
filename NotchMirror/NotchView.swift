@@ -140,7 +140,7 @@ struct NotchView: View {
 
     private var notchPill: some View {
         RoundedRectangle(cornerRadius: Layout.pillRadius, style: .continuous)
-            .fill(Color.black)
+            .fill(Color.clear)
             .frame(width: notchSize.width, height: notchSize.height)
             // No onTapGesture — NotchWindow.mouseDown handles first click
             // at the NSWindow level, bypassing the nonactivatingPanel focus issue.
