@@ -13,6 +13,7 @@
 		AA000004 /* CameraPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100004 /* CameraPreviewView.swift */; };
 		AA000005 /* ClipboardManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100005 /* ClipboardManager.swift */; };
 		AA000006 /* NotchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100006 /* NotchView.swift */; };
+		AA000007 /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100009 /* UpdateChecker.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,7 @@
 		AA100006 /* NotchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchView.swift; sourceTree = "<group>"; };
 		AA100007 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA100008 /* NotchMirror.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotchMirror.entitlements; sourceTree = "<group>"; };
+		AA100009 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		AA200001 /* NotchMirror.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NotchMirror.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -49,6 +51,7 @@
 				AA100006 /* NotchView.swift */,
 				AA100007 /* Info.plist */,
 				AA100008 /* NotchMirror.entitlements */,
+				AA100009 /* UpdateChecker.swift */,
 			);
 			path = NotchMirror;
 			sourceTree = "<group>";
@@ -143,6 +146,7 @@
 				AA000004 /* CameraPreviewView.swift in Sources */,
 				AA000005 /* ClipboardManager.swift in Sources */,
 				AA000006 /* NotchView.swift in Sources */,
+				AA000007 /* UpdateChecker.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

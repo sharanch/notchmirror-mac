@@ -25,6 +25,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         setupLoginItem()
         blockCmdQ()
 
+        DispatchQueue.global().asyncAfter(deadline: .now() + 2) {
+            UpdateChecker.checkForUpdates()
+        }
+
         AVCaptureDevice.requestAccess(for: .video) { _ in
             DispatchQueue.main.async {
                 self.notchWindowController = NotchWindowController()

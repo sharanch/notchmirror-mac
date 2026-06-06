@@ -1,44 +1,70 @@
-// UpdateChecker.swift — drop this into NotchMirror/
+// UpdateChecker.swift
 
 import Foundation
 import AppKit
 
 final class UpdateChecker {
 
-    // ── Change these to your GitHub repo ──────────────────────────────────
     private static let repoOwner = "sharanch"
     private static let repoName  = "notchmirror-mac"
-    // ──────────────────────────────────────────────────────────────────────
 
     private static let apiURL = URL(string:
         "https://api.github.com/repos/\(repoOwner)/\(repoName)/releases/latest"
     )!
 
-    /// Call once on launch. Shows an alert only when a newer version exists.
-    static func checkForUpdates(silent: Bool = false) {
+    static func checkForUpdates() {
+        print("UpdateChecker: starting check against \(apiURL)")
+
         var request = URLRequest(url: apiURL)
         request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
 
-        URLSession.shared.dataTask(with: request) { data, _, error in
+        URLSession.shared.dataTask(with: request) { data, response, error in
+
+            if let error {
+                print("UpdateChecker: network error — \(error)")
+                return
+            }
+
+            if let http = response as? HTTPURLResponse {
+                print("UpdateChecker: HTTP \(http.statusCode)")
+                if http.statusCode != 200 {
+                    // 404 = no releases on GitHub yet
+                    // 403 = rate limited
+                    if let data, let body = String(data: data, encoding: .utf8) {
+                        print("UpdateChecker: response body — \(body)")
+                    }
+                    return
+                }
+            }
+
+            guard let data else {
+                print("UpdateChecker: no data returned")
+                return
+            }
+
             guard
-                error == nil,
-                let data,
                 let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                 let tagName = json["tag_name"] as? String,
                 let htmlURL = json["html_url"] as? String
             else {
-                if !silent { print("UpdateChecker: failed to fetch release info") }
+                print("UpdateChecker: failed to parse JSON")
+                if let body = String(data: data, encoding: .utf8) {
+                    print("UpdateChecker: raw response — \(body.prefix(300))")
+                }
                 return
             }
 
             let latest  = tagName.trimmingCharacters(in: .init(charactersIn: "v"))
             let current = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.0"
 
+            print("UpdateChecker: latest=\(latest)  current=\(current)")
+
             guard isNewer(latest, than: current) else {
-                print("UpdateChecker: up to date (\(current))")
+                print("UpdateChecker: already up to date")
                 return
             }
 
+            print("UpdateChecker: update available — showing alert")
             DispatchQueue.main.async {
                 showUpdateAlert(currentVersion: current,
                                 latestVersion: latest,
@@ -46,8 +72,6 @@ final class UpdateChecker {
             }
         }.resume()
     }
-
-    // MARK: – Private helpers
 
     private static func isNewer(_ remote: String, than local: String) -> Bool {
         let r = versionTuple(remote)
