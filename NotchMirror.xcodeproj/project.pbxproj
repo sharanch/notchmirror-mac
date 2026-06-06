@@ -14,6 +14,7 @@
 		AA000005 /* ClipboardManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100005 /* ClipboardManager.swift */; };
 		AA000006 /* NotchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100006 /* NotchView.swift */; };
 		AA000007 /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100009 /* UpdateChecker.swift */; };
+		AA000008 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA100010 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,7 @@
 		AA100007 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA100008 /* NotchMirror.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotchMirror.entitlements; sourceTree = "<group>"; };
 		AA100009 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
+		AA100010 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA200001 /* NotchMirror.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NotchMirror.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -52,6 +54,7 @@
 				AA100007 /* Info.plist */,
 				AA100008 /* NotchMirror.entitlements */,
 				AA100009 /* UpdateChecker.swift */,
+				AA100010 /* Assets.xcassets */,
 			);
 			path = NotchMirror;
 			sourceTree = "<group>";
@@ -130,6 +133,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA000008 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
