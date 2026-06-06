@@ -8,6 +8,7 @@ protocol NotchWindowResizable: AnyObject {
 class NotchWindowController: NSWindowController, NotchWindowResizable {
 
     private let clipboardBtnWidth: CGFloat = 36
+    private let quitBtnWidth:      CGFloat = 30   // quit btn (26) + 4pt gap
     private let cardWidth:  CGFloat = 380
     private let cardHeight: CGFloat = 214
 
@@ -60,12 +61,12 @@ class NotchWindowController: NSWindowController, NotchWindowResizable {
             //   • extra card overhang = (cardWidth - notchWidth) / 2 per side
             //   • clipboard btn still hangs off the right
             let overhang = max((cardWidth - notch.width) / 2, 0)
-            windowWidth  = overhang + notch.width + overhang + clipboardBtnWidth
+            windowWidth  = overhang + notch.width + overhang + clipboardBtnWidth + quitBtnWidth
             windowHeight = notch.height + cardHeight
             // Shift window left by overhang so the pill stays over the notch
             windowX      = sf.midX - notch.width / 2 - overhang
         } else {
-            windowWidth  = notch.width + clipboardBtnWidth
+            windowWidth  = notch.width + clipboardBtnWidth + quitBtnWidth
             windowHeight = notch.height
             windowX      = sf.midX - notch.width / 2
         }
@@ -125,6 +126,7 @@ class NotchWindow: NSPanel {
         self.collectionBehavior = [.stationary, .ignoresCycle]
         self.isMovable = false
         self.acceptsMouseMovedEvents = true
+        self.sharingType = .none
 
         let notchView = NotchView()
         let hostingView = NSHostingView(rootView: notchView)

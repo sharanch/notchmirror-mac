@@ -23,6 +23,10 @@ private enum Layout {
     static let clipboardBtnSize:    CGFloat = 26
     static let clipboardPad:        CGFloat = 8    // gap between notch edge and btn center
 
+    // Quit button (sits to the RIGHT of the clipboard button)
+    static let quitBtnSize:         CGFloat = 26
+    static let quitBtnPad:          CGFloat = 4    // gap between clipboard btn and quit btn
+
     static let animDuration:        Double  = 0.38
 }
 
@@ -101,6 +105,9 @@ struct NotchView: View {
                 Spacer().frame(width: Layout.clipboardPad)
                 clipboardButton
                     .frame(width: Layout.clipboardBtnSize, height: Layout.clipboardBtnSize)
+                Spacer().frame(width: Layout.quitBtnPad)
+                quitButton
+                    .frame(width: Layout.quitBtnSize, height: Layout.quitBtnSize)
                 Spacer()
             }
             .frame(height: notchSize.height, alignment: .top)
@@ -112,9 +119,9 @@ struct NotchView: View {
                 HStack(spacing: 0) {
                     Spacer()
                     cameraCard
-                    // Push left of clipboard btn area so card stays visually centred
-                    // under the notch, not under the notch+clipboard region.
-                    Spacer().frame(width: Layout.clipboardBtnSize + Layout.clipboardPad)
+                    // Push left of clipboard+quit btn area so card stays visually centred
+                    // under the notch, not under the notch+clipboard+quit region.
+                    Spacer().frame(width: Layout.clipboardBtnSize + Layout.clipboardPad + Layout.quitBtnPad + Layout.quitBtnSize)
                 }
                 .padding(.top, 6)
                 .transition(.asymmetric(
@@ -206,6 +213,26 @@ struct NotchView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.black)
         }
+    }
+
+    // -----------------------------------------------------------------------
+    // MARK: – Quit button
+    // -----------------------------------------------------------------------
+
+    private var quitButton: some View {
+        Button { NSApp.terminate(nil) } label: {
+            ZStack {
+                Circle()
+                    .fill(Color.black)
+                    .frame(width: Layout.quitBtnSize, height: Layout.quitBtnSize)
+                Image(systemName: "power")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.white)
+            }
+        }
+        .buttonStyle(.plain)
+        .onHover { h in h ? NSCursor.pointingHand.push() : NSCursor.pop() }
+        .help("Quit NotchMirror")
     }
 
     // -----------------------------------------------------------------------
