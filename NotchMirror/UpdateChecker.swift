@@ -7,6 +7,7 @@ final class UpdateChecker {
 
     private static let repoOwner = "sharanch"
     private static let repoName  = "notchmirror-mac"
+    private static let installedVersionKey = "installedVersion"
 
     private static let apiURL = URL(string:
         "https://api.github.com/repos/\(repoOwner)/\(repoName)/releases/latest"
@@ -28,8 +29,6 @@ final class UpdateChecker {
             if let http = response as? HTTPURLResponse {
                 print("UpdateChecker: HTTP \(http.statusCode)")
                 if http.statusCode != 200 {
-                    // 404 = no releases on GitHub yet
-                    // 403 = rate limited
                     if let data, let body = String(data: data, encoding: .utf8) {
                         print("UpdateChecker: response body — \(body)")
                     }
@@ -48,30 +47,29 @@ final class UpdateChecker {
                 let htmlURL = json["html_url"] as? String
             else {
                 print("UpdateChecker: failed to parse JSON")
-                if let body = String(data: data, encoding: .utf8) {
-                    print("UpdateChecker: raw response — \(body.prefix(300))")
-                }
                 return
             }
 
-            let latest  = tagName.trimmingCharacters(in: .init(charactersIn: "v"))
-            let current = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.0"
+            let latest    = tagName.trimmingCharacters(in: .init(charactersIn: "v"))
+            let installed = UserDefaults.standard.string(forKey: installedVersionKey)
+                         ?? Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+                         ?? "0.0.0"
 
-            print("UpdateChecker: latest=\(latest)  current=\(current)")
+            print("UpdateChecker: latest=\(latest)  installed=\(installed)")
 
-            guard isNewer(latest, than: current) else {
+            guard isNewer(latest, than: installed) else {
                 print("UpdateChecker: already up to date")
                 return
             }
 
             print("UpdateChecker: update available — showing alert")
             DispatchQueue.main.async {
-                showUpdateAlert(currentVersion: current,
-                                latestVersion: latest,
-                                releaseURL: htmlURL)
+                showUpdateAlert(latestVersion: latest, releaseURL: htmlURL)
             }
         }.resume()
     }
+
+    // MARK: – Private helpers
 
     private static func isNewer(_ remote: String, than local: String) -> Bool {
         let r = versionTuple(remote)
@@ -88,19 +86,19 @@ final class UpdateChecker {
                 parts.indices.contains(2) ? parts[2] : 0)
     }
 
-    private static func showUpdateAlert(currentVersion: String,
-                                        latestVersion: String,
-                                        releaseURL: String) {
+    private static func showUpdateAlert(latestVersion: String, releaseURL: String) {
         let alert = NSAlert()
         alert.messageText     = "Update Available"
-        alert.informativeText = "NotchMirror \(latestVersion) is available (you have \(currentVersion))."
+        alert.informativeText = "NotchMirror \(latestVersion) is available."
         alert.alertStyle      = .informational
         alert.addButton(withTitle: "Download Update")
         alert.addButton(withTitle: "Later")
 
-        if alert.runModal() == .alertFirstButtonReturn,
-           let url = URL(string: releaseURL) {
-            NSWorkspace.shared.open(url)
+        if alert.runModal() == .alertFirstButtonReturn {
+            UserDefaults.standard.set(latestVersion, forKey: installedVersionKey)
+            if let url = URL(string: releaseURL) {
+                NSWorkspace.shared.open(url)
+            }
         }
     }
 }
