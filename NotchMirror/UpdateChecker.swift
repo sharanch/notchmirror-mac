@@ -14,6 +14,14 @@ final class UpdateChecker {
     )!
 
     static func checkForUpdates() {
+        let bundleVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.0"
+        let stored = UserDefaults.standard.string(forKey: installedVersionKey) ?? "0.0.0"
+
+        // If the installed app is newer than what's stored, update stored value
+        if isNewer(bundleVersion, than: stored) {
+            UserDefaults.standard.set(bundleVersion, forKey: installedVersionKey)
+        }
+
         print("UpdateChecker: starting check against \(apiURL)")
 
         var request = URLRequest(url: apiURL)
@@ -51,9 +59,7 @@ final class UpdateChecker {
             }
 
             let latest    = tagName.trimmingCharacters(in: .init(charactersIn: "v"))
-            let installed = UserDefaults.standard.string(forKey: installedVersionKey)
-                         ?? Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
-                         ?? "0.0.0"
+            let installed = UserDefaults.standard.string(forKey: installedVersionKey) ?? "0.0.0"
 
             print("UpdateChecker: latest=\(latest)  installed=\(installed)")
 
