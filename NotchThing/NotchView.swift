@@ -232,7 +232,7 @@ struct NotchView: View {
         }
         .buttonStyle(.plain)
         .onHover { h in h ? NSCursor.pointingHand.push() : NSCursor.pop() }
-        .help("Quit NotchMirror")
+        .help("Quit NotchThing")
     }
 
     // -----------------------------------------------------------------------

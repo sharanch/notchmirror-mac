@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleDisplayName</key>
-    <string>NotchMirror</string>
+    <string>NotchThing</string>
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key>
@@ -29,6 +29,6 @@
 
     <!-- Camera permission -->
     <key>NSCameraUsageDescription</key>
-    <string>NotchMirror uses your front camera as a mirror when you click the notch.</string>
+    <string>NotchThing uses your front camera as a mirror when you click the notch.</string>
 </dict>
 </plist>

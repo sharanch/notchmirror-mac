@@ -35,16 +35,16 @@ jobs:
           fi
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "MARKETING_VERSION=$MARKETING_VERSION" >> $GITHUB_OUTPUT
-          echo "DMG_ASSET=NotchMirror-${VERSION}.dmg" >> $GITHUB_OUTPUT
+          echo "DMG_ASSET=NotchThing-${VERSION}.dmg" >> $GITHUB_OUTPUT
 
       # ── 4. Build archive (unsigned) ───────────────────────────────
       - name: Build Xcode archive
         run: |
           xcodebuild archive \
-            -project NotchMirror.xcodeproj \
-            -scheme NotchMirror \
+            -project NotchThing.xcodeproj \
+            -scheme NotchThing \
             -configuration Release \
-            -archivePath $RUNNER_TEMP/NotchMirror.xcarchive \
+            -archivePath $RUNNER_TEMP/NotchThing.xcarchive \
             MARKETING_VERSION=${{ steps.version.outputs.MARKETING_VERSION }} \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
@@ -70,7 +70,7 @@ jobs:
           PLIST
 
           xcodebuild -exportArchive \
-            -archivePath $RUNNER_TEMP/NotchMirror.xcarchive \
+            -archivePath $RUNNER_TEMP/NotchThing.xcarchive \
             -exportOptionsPlist $RUNNER_TEMP/ExportOptions.plist \
             -exportPath $RUNNER_TEMP/export \
             CODE_SIGN_IDENTITY="" \
@@ -83,14 +83,14 @@ jobs:
       # extended attribute that Gatekeeper rejects on unsigned apps.
       - name: Strip extended attributes
         run: |
-          APP_PATH="$RUNNER_TEMP/export/NotchMirror.app"
+          APP_PATH="$RUNNER_TEMP/export/NotchThing.app"
           xattr -cr "$APP_PATH"
           chmod -R a+x "$APP_PATH/Contents/MacOS/"
 
       # ── 7. Package as DMG ─────────────────────────────────────────
       - name: Create DMG
         run: |
-          APP_PATH="$RUNNER_TEMP/export/NotchMirror.app"
+          APP_PATH="$RUNNER_TEMP/export/NotchThing.app"
           DMG_STAGING="$RUNNER_TEMP/dmg-staging"
 
           mkdir -p "$DMG_STAGING"
@@ -98,16 +98,16 @@ jobs:
           ln -s /Applications "$DMG_STAGING/Applications"
 
           hdiutil create \
-            -volname "NotchMirror" \
+            -volname "NotchThing" \
             -srcfolder "$DMG_STAGING" \
             -ov \
             -format UDZO \
-            "$RUNNER_TEMP/NotchMirror.dmg"
+            "$RUNNER_TEMP/NotchThing.dmg"
 
       # ── 8. Rename DMG to include version ─────────────────────────
       - name: Rename DMG
         run: |
-          mv "$RUNNER_TEMP/NotchMirror.dmg" \
+          mv "$RUNNER_TEMP/NotchThing.dmg" \
              "$RUNNER_TEMP/${{ steps.version.outputs.DMG_ASSET }}"
 
       # ── 9. Create GitHub Release & upload DMG ─────────────────────
@@ -115,21 +115,21 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.VERSION }}
-          name: "NotchMirror ${{ steps.version.outputs.VERSION }}"
+          name: "NotchThing ${{ steps.version.outputs.VERSION }}"
           draft: false
           prerelease: ${{ !startsWith(github.ref, 'refs/tags/v') }}
           body: |
-            ## NotchMirror ${{ steps.version.outputs.VERSION }}
+            ## NotchThing ${{ steps.version.outputs.VERSION }}
 
             ### Install
             1. Download **${{ steps.version.outputs.DMG_ASSET }}** below
-            2. Open the DMG and drag **NotchMirror** to your Applications folder
+            2. Open the DMG and drag **NotchThing** to your Applications folder
             3. Open Terminal and run:
             ```
-            xattr -cr /Applications/NotchMirror.app #or 
-            xattr -c /Applications/NotchMirror.app
+            xattr -cr /Applications/NotchThing.app #or 
+            xattr -c /Applications/NotchThing.app
             ```
-            4. Launch NotchMirror from Applications or Spotlight
+            4. Launch NotchThing from Applications or Spotlight
 
             > **Why step 3?** Apple requires a paid Developer account to notarize apps.
             > Without it, macOS blocks apps downloaded from the internet.

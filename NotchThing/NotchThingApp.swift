@@ -4,7 +4,7 @@ import AVFoundation
 import ServiceManagement
 
 @main
-struct NotchMirrorApp: App {
+struct NotchThingApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
@@ -77,7 +77,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             UserDefaults.standard.set(enabled, forKey: loginItemKey)
         } catch {
-            print("NotchMirror: login item \(enabled ? "register" : "unregister") failed: \(error)")
+            print("NotchThing: login item \(enabled ? "register" : "unregister") failed: \(error)")
         }
     }
 

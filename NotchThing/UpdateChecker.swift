@@ -57,7 +57,7 @@ final class UpdateChecker {
     private static func showUpdateAlert(latestVersion: String, releaseURL: String) {
         let alert = NSAlert()
         alert.messageText     = "Update Available"
-        alert.informativeText = "NotchMirror \(latestVersion) is available."
+        alert.informativeText = "NotchThing \(latestVersion) is available."
         alert.alertStyle      = .informational
         alert.addButton(withTitle: "Download Update")
         alert.addButton(withTitle: "Later")

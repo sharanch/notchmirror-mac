@@ -1,4 +1,4 @@
-# NotchMirror
+# NotchThing
 
 A macOS menu-bar app that turns your MacBook notch into a mirror — click the notch to see a front-camera view in a squircle card below it. Includes a clipboard history manager.
 
@@ -6,15 +6,15 @@ A macOS menu-bar app that turns your MacBook notch into a mirror — click the n
 
 ## Install (Download)
 
-1. Go to the [Releases](../../releases) page and download the latest `NotchMirror-vX.X.X.dmg`
-2. Open the DMG and drag **NotchMirror** to your Applications folder
+1. Go to the [Releases](../../releases) page and download the latest `NotchThing-vX.X.X.dmg`
+2. Open the DMG and drag **NotchThing** to your Applications folder
 3. Since the app is unsigned, macOS may block it on first launch. Run this once in Terminal:
 
 ```bash
-xattr -cr /Applications/NotchMirror.app
+xattr -cr /Applications/NotchThing.app
 ```
 
-4. Open NotchMirror from Applications or Spotlight
+4. Open NotchThing from Applications or Spotlight
 
 > **Why this is needed:** Apple requires a paid Developer account ($99/year) to notarize apps.
 > Without notarization, macOS quarantines apps downloaded from the internet.
@@ -24,7 +24,7 @@ xattr -cr /Applications/NotchMirror.app
 
 ## Login Item (Launch at Login)
 
-System Settings → General → Login Items → add NotchMirror
+System Settings → General → Login Items → add NotchThing
 
 ---
 
@@ -35,7 +35,7 @@ System Settings → General → Login Items → add NotchMirror
 | Camera | Front camera mirror view |
 | Pasteboard | Clipboard history monitoring |
 
-Both are declared in `Info.plist` and `NotchMirror.entitlements`.
+Both are declared in `Info.plist` and `NotchThing.entitlements`.
 
 ---
 
@@ -54,9 +54,9 @@ Both are declared in `Info.plist` and `NotchMirror.entitlements`.
 ### Steps
 
 ```bash
-xcodebuild -project NotchMirror.xcodeproj -scheme NotchMirror \
+xcodebuild -project NotchThing.xcodeproj -scheme NotchThing \
   -configuration Debug -derivedDataPath ./build \
   CODE_SIGN_IDENTITY="-" build
 
-open ./build/Build/Products/Debug/NotchMirror.app
+open ./build/Build/Products/Debug/NotchThing.app
 ```

@@ -103,7 +103,7 @@ class ClipboardManager: NSObject, ObservableObject {
     private let storageURL: URL = {
         let appSupport = FileManager.default
             .urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        let dir = appSupport.appendingPathComponent("NotchMirror", isDirectory: true)
+        let dir = appSupport.appendingPathComponent("NotchThing", isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         return dir.appendingPathComponent("clipboard.json")
     }()

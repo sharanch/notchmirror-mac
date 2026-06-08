@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AA000001 /* NotchMirrorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100001 /* NotchMirrorApp.swift */; };
+		AA000001 /* NotchThingApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100001 /* NotchThingApp.swift */; };
 		AA000002 /* NotchWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100002 /* NotchWindowController.swift */; };
 		AA000003 /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100003 /* CameraManager.swift */; };
 		AA000004 /* CameraPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100004 /* CameraPreviewView.swift */; };
@@ -18,17 +18,17 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		AA100001 /* NotchMirrorApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchMirrorApp.swift; sourceTree = "<group>"; };
+		AA100001 /* NotchThingApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchThingApp.swift; sourceTree = "<group>"; };
 		AA100002 /* NotchWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchWindowController.swift; sourceTree = "<group>"; };
 		AA100003 /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
 		AA100004 /* CameraPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreviewView.swift; sourceTree = "<group>"; };
 		AA100005 /* ClipboardManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardManager.swift; sourceTree = "<group>"; };
 		AA100006 /* NotchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchView.swift; sourceTree = "<group>"; };
 		AA100007 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		AA100008 /* NotchMirror.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotchMirror.entitlements; sourceTree = "<group>"; };
+		AA100008 /* NotchThing.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NotchThing.entitlements; sourceTree = "<group>"; };
 		AA100009 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		AA100010 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		AA200001 /* NotchMirror.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NotchMirror.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA200001 /* NotchThing.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NotchThing.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -42,27 +42,27 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		AA400001 /* NotchMirror */ = {
+		AA400001 /* NotchThing */ = {
 			isa = PBXGroup;
 			children = (
-				AA100001 /* NotchMirrorApp.swift */,
+				AA100001 /* NotchThingApp.swift */,
 				AA100002 /* NotchWindowController.swift */,
 				AA100003 /* CameraManager.swift */,
 				AA100004 /* CameraPreviewView.swift */,
 				AA100005 /* ClipboardManager.swift */,
 				AA100006 /* NotchView.swift */,
 				AA100007 /* Info.plist */,
-				AA100008 /* NotchMirror.entitlements */,
+				AA100008 /* NotchThing.entitlements */,
 				AA100009 /* UpdateChecker.swift */,
 				AA100010 /* Assets.xcassets */,
 			);
-			path = NotchMirror;
+			path = NotchThing;
 			sourceTree = "<group>";
 		};
 		AA400002 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				AA200001 /* NotchMirror.app */,
+				AA200001 /* NotchThing.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -70,7 +70,7 @@
 		AA400000 /* root */ = {
 			isa = PBXGroup;
 			children = (
-				AA400001 /* NotchMirror */,
+				AA400001 /* NotchThing */,
 				AA400002 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -78,9 +78,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		AA500001 /* NotchMirror */ = {
+		AA500001 /* NotchThing */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AA700001 /* Build configuration list for PBXNativeTarget "NotchMirror" */;
+			buildConfigurationList = AA700001 /* Build configuration list for PBXNativeTarget "NotchThing" */;
 			buildPhases = (
 				AA600001 /* Sources */,
 				AA300001 /* Frameworks */,
@@ -90,9 +90,9 @@
 			);
 			dependencies = (
 			);
-			name = NotchMirror;
-			productName = NotchMirror;
-			productReference = AA200001 /* NotchMirror.app */;
+			name = NotchThing;
+			productName = NotchThing;
+			productReference = AA200001 /* NotchThing.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -110,7 +110,7 @@
 					};
 				};
 			};
-			buildConfigurationList = AA700002 /* Build configuration list for PBXProject "NotchMirror" */;
+			buildConfigurationList = AA700002 /* Build configuration list for PBXProject "NotchThing" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -123,7 +123,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				AA500001 /* NotchMirror */,
+				AA500001 /* NotchThing */,
 			);
 		};
 /* End PBXProject section */
@@ -144,7 +144,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA000001 /* NotchMirrorApp.swift in Sources */,
+				AA000001 /* NotchThingApp.swift in Sources */,
 				AA000002 /* NotchWindowController.swift in Sources */,
 				AA000003 /* CameraManager.swift in Sources */,
 				AA000004 /* CameraPreviewView.swift in Sources */,
@@ -162,17 +162,17 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = NotchMirror/NotchMirror.entitlements;
+				CODE_SIGN_ENTITLEMENTS = NotchThing/NotchThing.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = NotchMirror/Info.plist;
+				INFOPLIST_FILE = NotchThing/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.notchmirror;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.notchthing;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -184,17 +184,17 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = NotchMirror/NotchMirror.entitlements;
+				CODE_SIGN_ENTITLEMENTS = NotchThing/NotchThing.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = NotchMirror/Info.plist;
+				INFOPLIST_FILE = NotchThing/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.notchmirror;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.notchthing;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -294,7 +294,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		AA700001 /* Build configuration list for PBXNativeTarget "NotchMirror" */ = {
+		AA700001 /* Build configuration list for PBXNativeTarget "NotchThing" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AA700010 /* Debug */,
@@ -303,7 +303,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AA700002 /* Build configuration list for PBXProject "NotchMirror" */ = {
+		AA700002 /* Build configuration list for PBXProject "NotchThing" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AA700020 /* Debug */,
